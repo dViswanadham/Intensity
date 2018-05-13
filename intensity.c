@@ -87,7 +87,8 @@ void print_player_name(void) {
 
 // Chooses strategic discards based on scanned input from STDIN
 void choose_discards() {
-	getchar(); // this bypasses any "newlines" i.e. '\n'
+	// This bypasses any "newlines" i.e. '\n'
+	getchar(); 
 	
 	int deck[N_CARDS_INITIAL_HAND] = {0};
 	int count_deck = 0;
@@ -221,7 +222,7 @@ int legal_card(int current_card, int suit, int deck[],
 	int trigger;
 	
 	if (current_card >= 30 && current_card <= 39) {
-		if (played_calves(current_round) && ( first_digit(current_card) == suit 
+		if (played_calves(current_round) && (first_digit(current_card) == suit 
 			|| suit == 0 )) {
 				
 			trigger = TRUE;
@@ -236,16 +237,16 @@ int legal_card(int current_card, int suit, int deck[],
 		}
 	}
 	
+	// Can play any card
 	if (suit == 0) {
-		// if it is your turn to make choice, you can pick any card
 		trigger = TRUE;
-		
+	
+	// Card is in suit
 	} else if (first_digit(current_card) == suit) {
-		// If the card is in the suit
 		trigger = TRUE;
 		
 	} else {
-		// if there are no other cards in your deck that you can legally play
+		// No other card you can legally play
 		if (card_same_suit(deck, suit)) {
 			trigger = FALSE;
 			
@@ -257,34 +258,36 @@ int legal_card(int current_card, int suit, int deck[],
 	return trigger;
 }
 
-// checks if your current had has a card with a particular suit
+// Checks if a card has the same specified suit
 int card_same_suit(int deck[], int suit) {
 	int variable_i = 0;
+	int trigger = FALSE;
 	
 	while(variable_i < N_CARDS_INITIAL_HAND) {
 		if (first_digit(deck[variable_i]) == suit) {
 			
-			return TRUE;
+			trigger = TRUE;
 		}
 		
 		variable_i = (variable_i + 1);
 	}
 	
-	return FALSE;
+	return trigger;
 }
 
-// Checks if the calf has already been played in prior rounds
+// Checks if any calves have been previously played
 int played_calves(int prev_rounds[N_MAX_ROUNDS][N_PLAYERS]) {
 	int variable_i = 0;
+	int trigger = FALSE;
 	
 	while(variable_i < N_MAX_ROUNDS) {
 		int variable_j = 0;
 		
 		while(variable_j < N_PLAYERS) {
-			if (30 <= prev_rounds[variable_i][variable_j] && 
+			if (prev_rounds[variable_i][variable_j] >= 30 && 
 				prev_rounds[variable_i][variable_j] <= 39) {
 				
-				return TRUE;
+				trigger = TRUE;
 			}
 			
 			variable_j = (variable_j + 1);
@@ -293,10 +296,10 @@ int played_calves(int prev_rounds[N_MAX_ROUNDS][N_PLAYERS]) {
 		variable_i = (variable_i + 1);
 	}
 	
-	return FALSE;
+	return trigger;
 }
 
-// Picks cards to play
+// Picks the cards to play in the current round
 int card_select(int deck[], int suit, int total_cards, 
 				int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
 					
@@ -326,7 +329,7 @@ double discard_risk(int current_card, int suit, int deck[], int play_cards) {
 	int exponent = 1;
 	int total_risk_value;
 	
-	// Reasoning: the bigger the suit, then the bigger the risk carried over
+	// Reasoning: the bigger the suit, then the bigger the risk
 	if (suit) {
 		exponent = suit;
 	}
@@ -360,7 +363,7 @@ double discard_risk(int current_card, int suit, int deck[], int play_cards) {
 	return total_risk_value;
 }
 
-// Returns the highest suit if we can void it at discard
+// Returns the highest suit if we are able to void it during our choose_discards
 int void_is_true(int deck[], int total_voids) {
 	int num_of_suits[SUITS] = {0};
 	int variable_i = 0;
@@ -397,17 +400,18 @@ int void_is_true(int deck[], int total_voids) {
 // Checks if a particular value is in an array
 int in_values(int insert_array[], int array_length, int element) {
 	int variable_i = 0;
+	int trigger = FALSE;
 	
 	while(variable_i < array_length) {
 		if (element == insert_array[variable_i]) {
 			
-			return TRUE;
+			trigger = TRUE;
 		}
 		
 		variable_i = (variable_i + 1);
 	}
 	
-	return FALSE;
+	return trigger;
 }
 
 // Gets rid of any spaces at the end of input
@@ -450,17 +454,11 @@ void run_unit_tests(void) {
 	assert(last_digit(42) == 2);
 	
 	// (2) Testing whether function correctly outputs if a calf has been played
-	int calf_in_round[N_MAX_ROUNDS][N_PLAYERS] = {
-		{11, 13, 15, 17},
-		{33, 35, 37, 39},
-		{0}
-	};
+	int calf_in_round[N_MAX_ROUNDS][N_PLAYERS] = 
+	{{11, 13, 15, 17}, {33, 35, 37, 39}, {0}};
 	
-	int calf_not_in_round[N_MAX_ROUNDS][N_PLAYERS] = {
-		{12, 14, 16, 18},
-		{42, 44, 46, 48},
-		{0}
-	};
+	int calf_not_in_round[N_MAX_ROUNDS][N_PLAYERS] = 
+	{{12, 14, 16, 18}, {42, 44, 46, 48}, {0}};
 	
 	assert(played_calves(calf_in_round) == TRUE);
 	assert(played_calves(calf_not_in_round) == FALSE);
