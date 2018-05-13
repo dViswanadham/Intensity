@@ -3,15 +3,15 @@
 //
 // This program by Dheeraj Viswanadham (z5204820)
 //
-// Started: 18/04/2018 | Last edited: 07/05/2018
+// Started: 18/04/2018 | Last edited: 13/05/2018
 //
 // Version 1.0.1: Minor changes to wording of comments.
 // Version 1.0.0: Assignment released.
 
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 // SOME USEFUL #defines - YOU WILL NEED MORE
 
@@ -28,11 +28,15 @@
 #define CARD_MIN             10
 #define CARD_MAX             49
 
-
 // ADD EXTRA #defines HERE
-#define MAX_FIRST_DIGIT_RANGE 10
+
+#define FALSE 0
+#define TRUE 1
+
+#define N_MAX_ROUNDS 10
+
+#define SUITES 4
 #define BUFFALO 47
-#define CARDS_TRANSITIONED 3
 
 void print_player_name(void);
 void choose_discards(void);
@@ -41,420 +45,423 @@ void run_unit_tests(void);
 
 // ADD PROTOTYPES FOR YOUR FUNCTIONS HERE
 
-int first_digit_one(int deck[N_CARDS_INITIAL_HAND], int ones_deck[MAX_FIRST_DIGIT_RANGE]);
-int first_digit_two(int deck[N_CARDS_INITIAL_HAND], int twos_deck[MAX_FIRST_DIGIT_RANGE]);
-int count_calves_deck(int deck[N_CARDS_INITIAL_HAND], int calves_deck[MAX_FIRST_DIGIT_RANGE]);
-int first_digit_four(int deck[N_CARDS_INITIAL_HAND], int fours_deck[MAX_FIRST_DIGIT_RANGE]);
-
+int first_digit(int number);
+int last_digit(int number);
+int legal_card(int current_card, int suit, int deck[], int current_round[N_MAX_ROUNDS][N_PLAYERS]);
+int card_same_suit(int deck[], int suit);
+int played_calves(int prev_rounds[N_MAX_ROUNDS][N_PLAYERS]);
+int void_is_true(int deck[], int amount_to_void);
+int in_values(int array[], int length, int value);
+int card_select(int deck[], int suit, int n_cards, int current_round[N_MAX_ROUNDS][N_PLAYERS]);
+double discard_risk(int current_card, int suit, int deck[], int cards_to_play);
+void bypass_space(int variable_i, int counter);
 
 // You should not need to change this main function
 
 int main(void) {
-
-	int which_action = 0;
-	scanf("%d", &which_action);
-	if (which_action == ACTION_PLAYER_NAME) {
-		print_player_name();
-	} else if (which_action == ACTION_DISCARD) {
-		choose_discards();
-	} else if (which_action == ACTION_PLAY_CARD) {
-		choose_card_to_play();
-	} else {
-		run_unit_tests();
-	}
+    int which_action = 0;
 	
-	return 0;
+    scanf("%d", &which_action);
+	
+    if (which_action == ACTION_PLAYER_NAME) {
+        print_player_name();
+    } else if (which_action == ACTION_DISCARD) {
+        choose_discards();
+    } else if (which_action == ACTION_PLAY_CARD) {
+        choose_card_to_play();
+    } else {
+        run_unit_tests();
+    }
+	
+    return 0;
 }
 
+// Prints the player name
 void print_player_name(void) {
-	printf("A2.V1\n");
+    printf("Alpha-B1\n");
 }
 
+// Chooses discards based on its scanned in deck and whether
+// the deck can be voided in some way
 void choose_discards() {
-	int cards_discarded[N_CARDS_DISCARDED] = {0};
-	int total_discards = 0;
+	getchar(); // this bypasses any newlines
 	
-	int ones_deck[MAX_FIRST_DIGIT_RANGE] = {0};   	//
-	int number_of_ones_deck = 0;  	// - For ones_deck
-	int total_ones_deck = 0;    	//
+	int deck[N_CARDS_INITIAL_HAND] = {0};
+	int hand_count = 0;
+	int variable_i = 0;
 	
-
-	int twos_deck[MAX_FIRST_DIGIT_RANGE] = {0};   	//
-	int number_of_twos_deck = 0;  	// - For twos_deck
-	int total_twos_deck = 0;    	//
-	
-	int calves_deck[MAX_FIRST_DIGIT_RANGE] = {0}; 	//
-	int number_of_calves_deck = 0;	// - For calves_deck
-	int total_calves_deck = 0;  	//
-	
-	int fours_deck[MAX_FIRST_DIGIT_RANGE] = {0};  	//
-	int number_of_fours_deck = 0; 	// - For fours_deck
-	int total_fours_deck = 0;   	//
-	
-	int count_suits = 4;
-	int minimum_num = 9;
-	
-	int deck_of_cards[N_CARDS_INITIAL_HAND];
-	int count_cards = 0;
-	
-	while (count_cards < N_CARDS_INITIAL_HAND) {
-		scanf("%d", &deck_of_cards[count_cards]); // Scans each card from stdin into AI's deck
-
-		count_cards = count_cards + 1;
+	while(variable_i < N_CARDS_INITIAL_HAND) {
+		scanf("%d", &deck[variable_i]);
+		bypass_space(variable_i, N_CARDS_INITIAL_HAND);
+		
+		variable_i = (variable_i + 1);
 	}
 	
-	count_cards = 0;
+	int discards[N_CARDS_DISCARDED] = {0};
+	int variable_j = 0;
 	
-	total_ones_deck = first_digit_one(deck_of_cards, ones_deck);
-	total_twos_deck = first_digit_two(deck_of_cards, twos_deck);
-	total_calves_deck = count_calves_deck(deck_of_cards, calves_deck);
-	total_fours_deck = first_digit_four(deck_of_cards, fours_deck);
-	
-	while(total_discards < 3) {
-		if (total_fours_deck > 3) {
-			
-			count_cards = 49;
-			number_of_fours_deck = 0;
-			
-			while(40 <= count_cards && count_cards != BUFFALO && total_discards < 3
-				  && total_fours_deck > 3) { // Want to keep buffalo
-				
-				if (fours_deck[number_of_fours_deck] == count_cards) { // Discarding high cards, starting at 49
-				
-					cards_discarded[total_discards] = fours_deck[number_of_fours_deck];
-					fours_deck[number_of_fours_deck] = 0; // Ensures no double counting
-					number_of_fours_deck++;
-					total_discards++;
-				}
-				
-				count_cards = count_cards - 1;
+	while(variable_j < N_CARDS_DISCARDED) {
+		int variable_x = 0;
+		double max_risk = 0;
+		int max_risk_k = 0;
+		
+		while(variable_x < N_CARDS_INITIAL_HAND) {
+			if (max_risk <= discard_risk(deck[variable_x], 0, deck, N_CARDS_DISCARDED) && !in_values(discards, N_CARDS_DISCARDED, deck[variable_x])) {
+				max_risk = discard_risk(deck[variable_x], 0, deck, N_CARDS_DISCARDED);
+				max_risk_k = variable_x;
 			}
 			
-		} else if (total_calves_deck > 3) {
-			
-			count_cards = 39;
-			number_of_calves_deck = 0;
-			
-			while(30 <= count_cards && total_discards < 3 && total_calves_deck > 3) {
-				if (calves_deck[number_of_calves_deck] == count_cards) {
-					
-					cards_discarded[total_discards] = calves_deck[number_of_calves_deck];
-					calves_deck[number_of_calves_deck] = 0;
-					number_of_calves_deck++;
-					total_discards++;
-				}
-				
-				count_cards = count_cards - 1;
-			}
-			
-		} else if (total_twos_deck > 3) {
-			
-			count_cards = 29;
-			number_of_twos_deck = 0;
-			
-			while(20 <= count_cards && total_discards < 3 && total_twos_deck > 3) {
-				if (twos_deck[number_of_twos_deck] == count_cards) {
-					
-					cards_discarded[total_discards] = twos_deck[number_of_twos_deck];
-					twos_deck[number_of_twos_deck] = 0;
-					number_of_twos_deck++;
-					total_discards++;
-				}
-				
-				count_cards = count_cards - 1;
-			}
-			
-		} else if (total_ones_deck > 3) {
-			
-			count_cards = 19;
-			number_of_ones_deck = 0;
-			
-			while(10 <= count_cards && total_discards < 3 && total_ones_deck > 3) {
-				if (ones_deck[number_of_ones_deck] == count_cards) {
-					
-					cards_discarded[total_discards] = ones_deck[number_of_ones_deck];
-					ones_deck[number_of_ones_deck] = 0;
-					number_of_ones_deck++;
-					total_discards++;
-				}
-				
-				count_cards = count_cards - 1;
-			}
-			
-		} else {
-			if (count_suits == 4) {
-				
-				count_cards = 49; 
-				number_of_fours_deck = 0;
-				
-				while(45 <= count_cards && count_cards != BUFFALO
-					  && total_discards < 3 && count_suits == 4) { // Want to keep buffalo
-					
-					if (fours_deck[number_of_fours_deck] == count_cards) { // Discarding high cards, starting at 49
-					
-						cards_discarded[total_discards] = fours_deck[number_of_fours_deck];
-						fours_deck[number_of_fours_deck] = 0; // Ensures no double counting
-						number_of_fours_deck++;
-						total_discards++;
-					}
-					
-					if(count_cards == 45) {
-						
-						count_suits = count_suits - 1;
-					}
-					
-					count_cards = count_cards - 1;
-				}
-			}
-			
-			if (count_suits == 3) {
-				
-				count_cards = 39;
-				number_of_calves_deck = 0;
-				
-				while(30 + minimum_num <= count_cards && total_discards < 3
-					  && count_suits == 3) {
-					
-					if (calves_deck[number_of_calves_deck] == count_cards) {
-						
-						cards_discarded[total_discards] = calves_deck[number_of_calves_deck];
-						calves_deck[number_of_calves_deck] = 0;
-						number_of_calves_deck++;
-						total_discards++;
-					}
-					
-					if (count_cards == 30 + minimum_num) {
-						
-						count_suits = count_suits - 1;
-					}
-					
-					count_cards = count_cards - 1;
-				}
-			}
-			
-			if (count_suits == 2) {
-				
-				count_cards = 29;
-				number_of_twos_deck = 0;
-				
-				while(20 + minimum_num <= count_cards && total_discards < 3
-					  && count_suits == 2){
-					
-					if (twos_deck[number_of_twos_deck] == count_cards) {
-						
-						cards_discarded[total_discards] = twos_deck[number_of_twos_deck];
-						twos_deck[number_of_twos_deck] = 0;
-						number_of_twos_deck++;
-						total_discards++;
-					}
-					
-					if (count_cards == 20 + minimum_num) {
-						
-						count_suits = count_suits - 1;
-					}
-					
-					count_cards = count_cards - 1;
-				}
-			}
-			
-			if (count_suits == 1){
-				
-				count_cards = 19;
-				number_of_ones_deck = 0;
-				
-				while(10 + minimum_num <= count_cards && total_discards < 3
-					  && count_suits == 1) {
-					
-					if (ones_deck[number_of_ones_deck] == count_cards) {
-						
-						cards_discarded[total_discards] = ones_deck[number_of_ones_deck];
-						ones_deck[number_of_ones_deck] = 0;
-						number_of_ones_deck++;
-						total_discards++;
-					}
-					
-					if(count_cards == 10 + minimum_num){
-						
-						count_suits = count_suits - 1;
-					}
-					
-					count_cards = count_cards - 1;
-				}
-			}
-			
-			minimum_num = minimum_num - 1;
+			variable_x = (variable_x + 1);
 		}
 		
-		count_suits = 4;
-	}
-	
-	count_cards = 0;
-	
-	printf("%d %d %d\n", cards_discarded[0], cards_discarded[1], cards_discarded[2]);
-}
-
-	// ADD CODE TO READ THE CARDS OF YOUR HAND INTO AN ARRAY USING SCANF
-	// ADD CODE TO READ THE CARDS PLAYED THIS ROUND INTO AN ARRAY USING SCANF
-	// ADD CODE TO READ THE CARDS PREVIOUSLY PLAYED THIS ROUND INTO AN ARRAY USING SCANF
-	// THEN ADD YOUR CODE HERE TO CHOOSE AND PRINT THE CARD YOU WISH TO PLAY
-
-	// NOTE: THE PROVIDED CODE DOES NOT MAKE A LEGAL MOVE. YOU MUST CHANGE IT TO
-	// PLAY A CARD FROM YOUR HAND.
-
-void choose_card_to_play(void) {
-	int count_cards = 0;
-	int length_of_hand = 0;
-	int previous_plays = 0;
-	int table_position = 0;
-	int discards[CARDS_TRANSITIONED];
-	int new_cards[CARDS_TRANSITIONED];
-	
-	scanf("%d", &length_of_hand); //Scans 1st integer, Length of Hand.
-	
-	int deck[length_of_hand];
-	int num_of_cards_played = ((N_CARDS_INITIAL_HAND - length_of_hand) * N_PLAYERS);
-	int num_of_rounds_played[num_of_cards_played];
-//-----------------------------------------------------------------------------
-//SCANNING ALL INFORMATION:
-//-----------------------------------------------------------------------------
-	
-	scanf("%d", &previous_plays); //Scans 2nd integer, the number of cards previously played.
-	
-	scanf("%d", &table_position); //Scans 3rd integer, the player's position.
-	
-	int cards_played_in_round[table_position];
-	
-	while (count_cards < length_of_hand) { //Scans 4th set, the Player's deck.
-		scanf("%d", &deck[count_cards]);
-		count_cards++;
-	}
-	
-	count_cards = 0;
-	
-	while(count_cards < previous_plays) { //Scans 5th set, cards played previously in the round.
-		scanf("%d", &cards_played_in_round[count_cards]);
-		count_cards++;
-	}
-	
-	count_cards = 0;
-	
-	while(count_cards < num_of_cards_played) { //Scans 6th set, cards played in previous games.
-		scanf("%d", &num_of_rounds_played[count_cards]);
-		count_cards++;
-	}
-	
-	count_cards = 0;
-	
-	while(count_cards < N_CARDS_DISCARDED){ //Scans 7th set, cards discards at beginning of game.
-		scanf("%d", &discards[count_cards]);
-	}
-	
-	count_cards = 0;
-	
-	while(count_cards < 3){ //Scans 8th set, the cards given to the player at the start of the game.
-		scanf("%d", &new_cards[count_cards]);
-	}
-	
-//-----------------------------------------------------------------------------
-//PLAYING THE GAME:
-//-----------------------------------------------------------------------------
-	int maxCard = deck_of_cards[0];
-	int first_digit;
-	int n;
-	
-	if (table_position != 0) {
-		for(n = 1, n < length_of_hand, n++) {
-			if ((deck_of_cards[n] > cards_played_in_round[0]) && (deck_of_cards[n] < cards_played_in_round[0][0]) {
-				if (deck_of_cards[n] > maxCard) {
-					maxCard = deck_of_cards[n];
-					printf("%d", maxCard);
-				
-				} else if ((deck_of_cards[n] < cards_played_in_round[0]) && (deck_of_cards[n] = ???))
-					
-	}
-	
-	if (table_position == 0) {
+		discards[variable_j] = deck[max_risk_k];
+		printf("%d", discards[variable_j]);
 		
+		if (variable_j == 2) {
+			printf("\n");
+		
+		} else {
+			printf(" ");
+		}
+		
+		variable_j = (variable_j + 1);
+	}
+}
+
+// Scans in input values and chooses a strategic card to play
+// based on those inputs
+void choose_card_to_play(void) {
+	int n_cards = 0;
+	int cards_played = 0;
+	int table_position = 0;
+	
+	// SCANNING ALL INFORMATION:
+	
+	scanf("%d %d %d", &n_cards, &cards_played, &table_position);
+	
+	int turn = (N_MAX_ROUNDS - n_cards);
+	int deck[N_CARDS_INITIAL_HAND] = {0};
+	int variable_i = 0;
+	
+	while(variable_i < n_cards) {
+		scanf("%d", &deck[variable_i]);
+		bypass_space(variable_i, n_cards);
+		
+		variable_i = (variable_i + 1);
 	}
 	
+	int played[N_CARDS_INITIAL_HAND] = {0};
+	int variable_j = 0;
 	
+	while(variable_j < cards_played) {
+		scanf("%d", &played[variable_j]);
+		bypass_space(variable_j, cards_played);
+		
+		variable_j = (variable_j + 1);
+	}
 	
+	int current_round[N_MAX_ROUNDS][N_PLAYERS] = {{0}};
+	int variable_y = 0;
 	
+	// If N_CARDS = 9, then we know it is the first turn and one previous round
 	
+	while(variable_y < turn) {
+		scanf("%d %d %d %d", &current_round[variable_y][0], &current_round[variable_y][1], &current_round[variable_y][2], &current_round[variable_y][3]);
+		
+		variable_y = (variable_y + 1);
+	}
 	
-	printf("42\n"); // Change return value
+	int discards[N_CARDS_DISCARDED] = {0};
+	int receivedDiscards[N_CARDS_DISCARDED] = {0};
+	
+	scanf("%d %d %d", &discards[0], &discards[1], &discards[2]);
+	scanf("%d %d %d", &receivedDiscards[0], &receivedDiscards[1], &receivedDiscards[2]);
+	
+	int suit = first_digit(played[0]);
+	
+	// Outputting the best card to play in this round:
+	
+	int current_card = card_select(deck, suit, n_cards, current_round);
+	
+	printf("%d\n", current_card);
 }
-
-
-// ADD A COMMENT HERE EXPLAINING YOUR OVERALL TESTING STRATEGY
-
-void run_unit_tests(void) {
-	// PUT YOUR UNIT TESTS HERE
-}
-
 
 // ADD YOUR FUNCTIONS HERE
 
-int first_digit_one(int deck[N_CARDS_INITIAL_HAND], int ones_deck[MAX_FIRST_DIGIT_RANGE]) {
-	int count_cards = 0;
-	int number_of_ones_deck = 0;
+// Returns the first digit (of the number of the card) i.e. 2 if card was 24
+int first_digit(int number) {
+	int first_num;
 	
-	while (count_cards < N_CARDS_INITIAL_HAND) {
-		if (10 <= deck[count_cards] && deck[count_cards] <= 19 ) { // Sorts into ones_deck
-			ones_deck[number_of_ones_deck] = deck[count_cards];
-			number_of_ones_deck = number_of_ones_deck + 1;
-		}
-		
-		count_cards = count_cards + 1;
-	}
+	first_num = ((number % 100 - (last_digit(number)))/ 10);
 	
-	return number_of_ones_deck;
+	return first_num;
 }
 
-int first_digit_two(int deck[N_CARDS_INITIAL_HAND],int twos_deck[10]) {
-	int count_cards = 0;
-	int number_of_twos_deck = 0;
+// Returns the last digit (of the number of the card) i.e. 4 if card was 24
+int last_digit(int number) {
+	int last_num;
 	
-	while (count_cards < N_CARDS_INITIAL_HAND) {
-		if (20 <= deck[count_cards] && deck[count_cards] <= 29 ) { // Sorts into twos_deck
-			twos_deck[number_of_twos_deck] = deck[count_cards];
-			number_of_twos_deck = number_of_twos_deck + 1;
-		}
-		
-		count_cards = count_cards + 1;
-	}
+	last_num = (number % 10);
 	
-	return number_of_twos_deck;
+	return last_num;
 }
 
-int count_calves_deck(int deck[N_CARDS_INITIAL_HAND], int calves_deck[10]) {
-	int count_cards = 0;
-	int number_of_calves_deck = 0;
-	
-	while (count_cards < N_CARDS_INITIAL_HAND) {
-		if (30 <= deck[count_cards] && deck[count_cards] <= 39 ) { // Sorts into calves_deck
-			calves_deck[number_of_calves_deck] = deck[count_cards];
-			number_of_calves_deck = number_of_calves_deck + 1;
-		}
-		
-		count_cards = count_cards + 1;
+// Gets rid of any spaces at the end of input
+void bypass_space(int variable_i, int counter) {
+	if (variable_i != (counter - 1)) {
+		scanf(" ");
 	}
-	
-	return number_of_calves_deck;
 }
 
-int first_digit_four(int deck[N_CARDS_INITIAL_HAND], int fours_deck[10]) {
-	int count_cards = 0;
-	int number_of_fours_deck = 0;
+// determines if a given card is legal to play
+// based on current suit (0 if no suit) and the players deck
+int legal_card(int current_card, int suit, int deck[], int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
+	int trigger;
 	
-	while (count_cards < N_CARDS_INITIAL_HAND) {
-		if (40 <= deck[count_cards] && deck[count_cards] <= 49 ) { // Sorts into fours_deck
-			fours_deck[number_of_fours_deck] = deck[count_cards];
-			number_of_fours_deck = number_of_fours_deck + 1;
+	if (current_card >= 30 && current_card <= 39) {
+		if (played_calves(current_round) && ( first_digit(current_card) == suit || suit == 0 )) {
+			trigger = TRUE;
+			
+		} else {
+			if (card_same_suit(deck, suit)) {
+				trigger = FALSE;
+				
+			} else {
+				trigger = TRUE;
+			}
 		}
-		
-		count_cards = count_cards + 1;
 	}
 	
-	return number_of_fours_deck;
+	if (suit == 0) {
+		// if it is your turn to make choice, you can pick any card
+		trigger = TRUE;
+		
+	} else if (first_digit(current_card) == suit) {
+		// If the card is in the suit
+		trigger = TRUE;
+		
+	} else {
+		// if there are no other cards in your deck that you can legally play
+		if (card_same_suit(deck, suit)) {
+			trigger = FALSE;
+			
+		} else {
+			trigger = TRUE;
+		}
+	}
+	
+	return trigger;
+}
+
+// checks if your current had has a card with a particular suit
+int card_same_suit(int deck[], int suit) {
+	int variable_i = 0;
+	
+	while(variable_i < N_CARDS_INITIAL_HAND) {
+		if (first_digit(deck[variable_i]) == suit) {
+			
+			return TRUE;
+		}
+		
+		variable_i = (variable_i + 1);
+	}
+	
+	return FALSE;
+}
+
+// Checks if the calf has already been played in prior rounds
+int played_calves(int prev_rounds[N_MAX_ROUNDS][N_PLAYERS]) {
+	int r = 0;
+	
+	while(r < N_MAX_ROUNDS) {
+		int p = 0;
+		
+		while(p < N_PLAYERS) {
+			if (30 <= prev_rounds[r][p] && prev_rounds[r][p] <= 39) {
+				
+				return TRUE;
+			}
+			
+			p = (p + 1);
+		}
+		
+		r = (r + 1);
+	}
+	
+	return FALSE;
+}
+
+// Picks cards to play
+int card_select(int deck[], int suit, int n_cards, int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
+	int best_score = 0;
+	int best_card_k = 0;
+	int variable_x = 0;
+	
+	while(variable_x < N_CARDS_INITIAL_HAND) {
+		if (legal_card(deck[variable_x], suit, deck, current_round) && deck[variable_x] != 0) {
+			if (best_score < discard_risk(deck[variable_x], suit, deck, 1)) {
+				
+				best_score = discard_risk(deck[variable_x], suit, deck, 1);
+				best_card_k = variable_x;
+			}
+		}
+		
+		variable_x = (variable_x + 1);
+	}
+	
+	return deck[best_card_k];
+}
+
+// Determines the risk of a card when choosing discards
+// Higher risk cards should be discarded sooner
+double discard_risk(int current_card, int suit, int deck[], int cards_to_play) {
+	double risk = 0;
+	int multiplier = 1;
+	
+	// larger suits tend to be riskier
+	if (suit) {
+		multiplier = suit;
+	}
+	
+	// if we are dealing with the current suit - it is a larger risk.
+	// (most of the time we are)
+	
+	if (first_digit(current_card) == suit) {
+		risk = 10;
+	}
+	
+	risk += 0.1 * last_digit(current_card);
+	
+	if (first_digit(current_card) == 3) {
+		risk *= 2;
+		
+	} else if (current_card >= BUFFALO) {
+		risk *= 5;
+	}
+	
+	// We want to hold onto these cards because they act as a buffer against
+	// a BUFFALO
+	if (current_card >= 40 && current_card < BUFFALO) {
+		risk *= 0.01;
+	}
+	
+	if(void_is_true(deck, cards_to_play)) {
+		if (first_digit(current_card) == void_is_true(deck, cards_to_play) ) {
+			risk = 100; // make sure we void this suit if we can.
+		}
+	}
+	
+	return risk * multiplier;
+}
+
+// Returns the highest suit if we can void it at discard
+int void_is_true(int deck[], int amount_to_void) {
+	int suit_tally[SUITES] = {0};
+	int variable_i = 0;
+	
+	while(variable_i < N_CARDS_INITIAL_HAND) {
+		if (deck[variable_i] != 0) {
+			suit_tally[ first_digit(deck[variable_i]) - 1 ] += 1;
+		}
+		
+		variable_i = (variable_i + 1);
+	}
+
+	int variable_x = 0;
+	int lowest = 4;
+	int lowest_k = 0;
+	
+	while(variable_x < SUITES) {
+		// If we can void the suit at this time
+		if (suit_tally[variable_x] <= amount_to_void && suit_tally[variable_x] != 0) {
+			if (lowest > suit_tally[variable_x]) {
+				// Find the lowest amount of suit we can void
+				// i.e. if we have 44 46 49 13 19, at discard
+				// we can void both 4 suit and 1 suit.
+				// We should void 1 suit first and then use the extra void
+				lowest = suit_tally[variable_x];
+				lowest_k = (variable_x + 1);
+			}
+		}
+		
+		variable_x = (variable_x + 1);
+	}
+	
+	return lowest_k;
+}
+
+// checks if a particular value is in an array
+int in_values(int array[], int length, int value) {
+	int variable_i = 0;
+	
+	while(variable_i < length) {
+		if (value == array[variable_i]) {
+			
+			return TRUE;
+		}
+		
+		variable_i = (variable_i + 1);
+	}
+	
+	return FALSE;
+}
+
+// ADD A COMMENT HERE EXPLAINING YOUR OVERALL TESTING STRATEGY
+
+/*
+===== TESTING STRATEGY =====
+0. First Number
+1. Last Number
+2. Calf Played
+3. Has card w/ suit
+4. Can void
+5. STDIN_values
+============================
+*/
+
+void run_unit_tests(void) {
+    // Testing the first-digit of the number function outputs correctly
+	assert(first_digit(10) == 1);
+	assert(first_digit(21) == 2);
+	assert(first_digit(39) == 3);
+	assert(first_digit(46) == 4);
+	
+	// Testing the last-digit of the number function outputs correctly
+	assert(last_digit(10) == 0);
+	assert(last_digit(21) == 1);
+	assert(last_digit(39) == 9);
+	assert(last_digit(46) == 6);
+	
+	// Testing whether the function correctly outputs if a calf has been played
+	int calf_in_round[N_MAX_ROUNDS][N_PLAYERS] = {
+		{11, 13, 15, 17},
+		{33, 35, 37, 39},
+		{0}
+	};
+	
+	int calf_not_in_round[N_MAX_ROUNDS][N_PLAYERS] = {
+		{12, 14, 16, 18},
+		{42, 44, 46, 48},
+		{0}
+	};
+	
+	assert(played_calves(calf_in_round) == TRUE);
+	assert(played_calves(calf_not_in_round) == FALSE);
+	
+	// Testing whether the first digit of the card is the same as the suit
+	int current_hand[N_CARDS_INITIAL_HAND] = {11,12,13,14,15,16,17,18,19,20};
+	
+	assert(card_same_suit(current_hand, 1) == TRUE);
+	assert(card_same_suit(current_hand, 4) == FALSE);
+	
+	// Testing the best card to play for the void function (highest suit)
+	int current_hand_void_three[5] = {11, 12, 13, 22, 23};
+	
+	assert(void_is_true(current_hand, 1) == 2);
+	assert(void_is_true(current_hand_void_three, 3) == 2);
+	assert(void_is_true(current_hand_void_three, 1) == 0);
+	
+	// Testing the "in" values i.e. if the card is in my deck or not
+	assert(in_values(current_hand, N_CARDS_INITIAL_HAND, 12) == TRUE);
+	assert(in_values(current_hand, N_CARDS_INITIAL_HAND, 42) == FALSE);
 }
