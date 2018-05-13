@@ -38,6 +38,8 @@
 #define SUITES 4
 #define BUFFALO 47
 
+#define TENS_DIGIT 10
+
 void print_player_name(void);
 void choose_discards(void);
 void choose_card_to_play(void);
@@ -50,8 +52,8 @@ int last_digit(int number);
 int legal_card(int current_card, int suit, int deck[], int current_round[N_MAX_ROUNDS][N_PLAYERS]);
 int card_same_suit(int deck[], int suit);
 int played_calves(int prev_rounds[N_MAX_ROUNDS][N_PLAYERS]);
-int void_is_true(int deck[], int amount_to_void);
-int in_values(int array[], int length, int value);
+int void_is_true(int deck[], int total_voids);
+int in_values(int insert_array[], int length, int value);
 int card_select(int deck[], int suit, int n_cards, int current_round[N_MAX_ROUNDS][N_PLAYERS]);
 double discard_risk(int current_card, int suit, int deck[], int cards_to_play);
 void bypass_space(int variable_i, int counter);
@@ -192,7 +194,7 @@ void choose_card_to_play(void) {
 int first_digit(int number) {
 	int first_num;
 	
-	first_num = ((number % 100 - (last_digit(number)))/ 10);
+	first_num = ((number % 100 - (last_digit(number)))/ TENS_DIGIT);
 	
 	return first_num;
 }
@@ -201,7 +203,7 @@ int first_digit(int number) {
 int last_digit(int number) {
 	int last_num;
 	
-	last_num = (number % 10);
+	last_num = (number % TENS_DIGIT);
 	
 	return last_num;
 }
@@ -271,21 +273,21 @@ int card_same_suit(int deck[], int suit) {
 
 // Checks if the calf has already been played in prior rounds
 int played_calves(int prev_rounds[N_MAX_ROUNDS][N_PLAYERS]) {
-	int r = 0;
+	int variable_i = 0;
 	
-	while(r < N_MAX_ROUNDS) {
-		int p = 0;
+	while(variable_i < N_MAX_ROUNDS) {
+		int variable_j = 0;
 		
-		while(p < N_PLAYERS) {
-			if (30 <= prev_rounds[r][p] && prev_rounds[r][p] <= 39) {
+		while(variable_j < N_PLAYERS) {
+			if (30 <= prev_rounds[variable_i][variable_j] && prev_rounds[variable_i][variable_j] <= 39) {
 				
 				return TRUE;
 			}
 			
-			p = (p + 1);
+			variable_j = (variable_j + 1);
 		}
 		
-		r = (r + 1);
+		variable_i = (variable_i + 1);
 	}
 	
 	return FALSE;
@@ -355,7 +357,7 @@ double discard_risk(int current_card, int suit, int deck[], int cards_to_play) {
 }
 
 // Returns the highest suit if we can void it at discard
-int void_is_true(int deck[], int amount_to_void) {
+int void_is_true(int deck[], int total_voids) {
 	int suit_tally[SUITES] = {0};
 	int variable_i = 0;
 	
@@ -373,7 +375,7 @@ int void_is_true(int deck[], int amount_to_void) {
 	
 	while(variable_x < SUITES) {
 		// If we can void the suit at this time
-		if (suit_tally[variable_x] <= amount_to_void && suit_tally[variable_x] != 0) {
+		if (suit_tally[variable_x] <= total_voids && suit_tally[variable_x] != 0) {
 			if (lowest > suit_tally[variable_x]) {
 				// Find the lowest amount of suit we can void
 				// i.e. if we have 44 46 49 13 19, at discard
@@ -391,11 +393,11 @@ int void_is_true(int deck[], int amount_to_void) {
 }
 
 // checks if a particular value is in an array
-int in_values(int array[], int length, int value) {
+int in_values(int insert_array[], int length, int value) {
 	int variable_i = 0;
 	
 	while(variable_i < length) {
-		if (value == array[variable_i]) {
+		if (value == insert_array[variable_i]) {
 			
 			return TRUE;
 		}
