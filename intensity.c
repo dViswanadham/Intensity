@@ -53,9 +53,9 @@ int legal_card(int current_card, int suit, int deck[], int current_round[N_MAX_R
 int card_same_suit(int deck[], int suit);
 int played_calves(int prev_rounds[N_MAX_ROUNDS][N_PLAYERS]);
 int void_is_true(int deck[], int total_voids);
-int in_values(int insert_array[], int length, int value);
-int card_select(int deck[], int suit, int n_cards, int current_round[N_MAX_ROUNDS][N_PLAYERS]);
-double discard_risk(int current_card, int suit, int deck[], int cards_to_play);
+int in_values(int insert_array[], int array_length, int element);
+int card_select(int deck[], int suit, int total_cards, int current_round[N_MAX_ROUNDS][N_PLAYERS]);
+double discard_risk(int current_card, int suit, int deck[], int play_cards);
 void bypass_space(int variable_i, int counter);
 
 // You should not need to change this main function
@@ -89,7 +89,7 @@ void choose_discards() {
 	getchar(); // this bypasses any newlines
 	
 	int deck[N_CARDS_INITIAL_HAND] = {0};
-	int hand_count = 0;
+	int count_deck = 0;
 	int variable_i = 0;
 	
 	while(variable_i < N_CARDS_INITIAL_HAND) {
@@ -99,25 +99,25 @@ void choose_discards() {
 		variable_i = (variable_i + 1);
 	}
 	
-	int discards[N_CARDS_DISCARDED] = {0};
+	int discarded[N_CARDS_DISCARDED] = {0};
 	int variable_j = 0;
 	
 	while(variable_j < N_CARDS_DISCARDED) {
 		int variable_x = 0;
-		double max_risk = 0;
-		int max_risk_k = 0;
+		int risk_value_card_x = 0;
+		double risk_value = 0;
 		
 		while(variable_x < N_CARDS_INITIAL_HAND) {
-			if (max_risk <= discard_risk(deck[variable_x], 0, deck, N_CARDS_DISCARDED) && !in_values(discards, N_CARDS_DISCARDED, deck[variable_x])) {
-				max_risk = discard_risk(deck[variable_x], 0, deck, N_CARDS_DISCARDED);
-				max_risk_k = variable_x;
+			if (risk_value <= discard_risk(deck[variable_x], 0, deck, N_CARDS_DISCARDED) && !in_values(discarded, N_CARDS_DISCARDED, deck[variable_x])) {
+				risk_value = discard_risk(deck[variable_x], 0, deck, N_CARDS_DISCARDED);
+				risk_value_card_x = variable_x;
 			}
 			
 			variable_x = (variable_x + 1);
 		}
 		
-		discards[variable_j] = deck[max_risk_k];
-		printf("%d", discards[variable_j]);
+		discarded[variable_j] = deck[risk_value_card_x];
+		printf("%d", discarded[variable_j]);
 		
 		if (variable_j == 2) {
 			printf("\n");
@@ -133,21 +133,21 @@ void choose_discards() {
 // Scans in input values and chooses a strategic card to play
 // based on those inputs
 void choose_card_to_play(void) {
-	int n_cards = 0;
+	int total_cards = 0;
 	int cards_played = 0;
 	int table_position = 0;
 	
 	// SCANNING ALL INFORMATION:
 	
-	scanf("%d %d %d", &n_cards, &cards_played, &table_position);
+	scanf("%d %d %d", &total_cards, &cards_played, &table_position);
 	
-	int turn = (N_MAX_ROUNDS - n_cards);
+	int turn = (N_MAX_ROUNDS - total_cards);
 	int deck[N_CARDS_INITIAL_HAND] = {0};
 	int variable_i = 0;
 	
-	while(variable_i < n_cards) {
+	while(variable_i < total_cards) {
 		scanf("%d", &deck[variable_i]);
-		bypass_space(variable_i, n_cards);
+		bypass_space(variable_i, total_cards);
 		
 		variable_i = (variable_i + 1);
 	}
@@ -173,17 +173,17 @@ void choose_card_to_play(void) {
 		variable_y = (variable_y + 1);
 	}
 	
-	int discards[N_CARDS_DISCARDED] = {0};
+	int discarded[N_CARDS_DISCARDED] = {0};
 	int receivedDiscards[N_CARDS_DISCARDED] = {0};
 	
-	scanf("%d %d %d", &discards[0], &discards[1], &discards[2]);
+	scanf("%d %d %d", &discarded[0], &discarded[1], &discarded[2]);
 	scanf("%d %d %d", &receivedDiscards[0], &receivedDiscards[1], &receivedDiscards[2]);
 	
 	int suit = first_digit(played[0]);
 	
 	// Outputting the best card to play in this round:
 	
-	int current_card = card_select(deck, suit, n_cards, current_round);
+	int current_card = card_select(deck, suit, total_cards, current_round);
 	
 	printf("%d\n", current_card);
 }
@@ -294,7 +294,7 @@ int played_calves(int prev_rounds[N_MAX_ROUNDS][N_PLAYERS]) {
 }
 
 // Picks cards to play
-int card_select(int deck[], int suit, int n_cards, int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
+int card_select(int deck[], int suit, int total_cards, int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
 	int best_score = 0;
 	int best_card_k = 0;
 	int variable_x = 0;
@@ -316,7 +316,7 @@ int card_select(int deck[], int suit, int n_cards, int current_round[N_MAX_ROUND
 
 // Determines the risk of a card when choosing discards
 // Higher risk cards should be discarded sooner
-double discard_risk(int current_card, int suit, int deck[], int cards_to_play) {
+double discard_risk(int current_card, int suit, int deck[], int play_cards) {
 	double risk = 0;
 	int multiplier = 1;
 	
@@ -347,8 +347,8 @@ double discard_risk(int current_card, int suit, int deck[], int cards_to_play) {
 		risk *= 0.01;
 	}
 	
-	if(void_is_true(deck, cards_to_play)) {
-		if (first_digit(current_card) == void_is_true(deck, cards_to_play) ) {
+	if(void_is_true(deck, play_cards)) {
+		if (first_digit(current_card) == void_is_true(deck, play_cards) ) {
 			risk = 100; // make sure we void this suit if we can.
 		}
 	}
@@ -393,11 +393,11 @@ int void_is_true(int deck[], int total_voids) {
 }
 
 // checks if a particular value is in an array
-int in_values(int insert_array[], int length, int value) {
+int in_values(int insert_array[], int array_length, int element) {
 	int variable_i = 0;
 	
-	while(variable_i < length) {
-		if (value == insert_array[variable_i]) {
+	while(variable_i < array_length) {
+		if (element == insert_array[variable_i]) {
 			
 			return TRUE;
 		}
