@@ -200,7 +200,7 @@ void choose_card_to_play(void) {
 
 // Returns the first digit (of the number of the card) i.e. 2 if card was 24
 int first_digit(int number) {
-	int first_num;
+	int first_num = 0;
 	
 	first_num = ((number % 100 - (last_digit(number)))/ TENS_DIGIT);
 	
@@ -209,7 +209,7 @@ int first_digit(int number) {
 
 // Returns the last digit (of the number of the card) i.e. 4 if card was 24
 int last_digit(int number) {
-	int last_num;
+	int last_num = 0;
 	
 	last_num = (number % TENS_DIGIT);
 	
@@ -219,7 +219,7 @@ int last_digit(int number) {
 // Determines if a card is legal to play based on current suit and player's hand
 int legal_card(int current_card, int suit, int deck[], 
 				int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
-	int trigger;
+	int trigger = FALSE;
 	
 	if (current_card >= 30 && current_card <= 39) {
 		if (played_calves(current_round) && (first_digit(current_card) == suit 
@@ -327,7 +327,7 @@ int card_select(int deck[], int suit, int total_cards,
 double discard_risk(int current_card, int suit, int deck[], int play_cards) {
 	double hazard = 0;
 	int exponent = 1;
-	int total_risk_value;
+	int total_risk_value = 0;
 	
 	// Reasoning: the bigger the suit, then the bigger the risk
 	if (suit) {
