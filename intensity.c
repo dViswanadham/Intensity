@@ -435,7 +435,9 @@ void bypass_space(int variable_i, int counter) {
 // (if you have any) and if you don't have them just play another card
 // within the largest digit range and put down the lowest one.
 //
-// For the unit tests strategy:
+// For the unit tests strategy: (with the help of the referee program) I was
+// able to break into these sub-functions and have unit tested appropriately
+//
 // 1) Test that function values returned for first and last digits are correct
 // 2) Test if a calf has been played before or not
 // 3) Test that the suits function works
