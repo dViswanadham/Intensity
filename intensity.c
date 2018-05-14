@@ -173,9 +173,10 @@ void choose_card_to_play(void) {
 	// If N_CARDS = 9, then we know it is the first turn and one previous round
 	
 	while(variable_y < player_turn) {
-		scanf("%d %d %d %d", &current_round[variable_y][0], 
-				&current_round[variable_y][1], &current_round[variable_y][2], 
-				&current_round[variable_y][3]);
+		scanf("%d %d %d %d",&current_round[variable_y][0],
+							&current_round[variable_y][1],
+							&current_round[variable_y][2],
+							&current_round[variable_y][3]);
 		
 		variable_y = (variable_y + 1);
 	}
@@ -183,9 +184,13 @@ void choose_card_to_play(void) {
 	int discarded[N_CARDS_DISCARDED] = {0};
 	int receivedDiscards[N_CARDS_DISCARDED] = {0};
 	
-	scanf("%d %d %d", &discarded[0], &discarded[1], &discarded[2]);
-	scanf("%d %d %d", &receivedDiscards[0], &receivedDiscards[1], 
-			&receivedDiscards[2]);
+	scanf("%d %d %d",&discarded[0],
+					 &discarded[1],
+					 &discarded[2]);
+					 
+	scanf("%d %d %d",&receivedDiscards[0],
+					 &receivedDiscards[1],
+					 &receivedDiscards[2]);
 	
 	int suit = first_digit(played[0]);
 	
@@ -202,7 +207,7 @@ void choose_card_to_play(void) {
 int first_digit(int number) {
 	int first_num = 0;
 	
-	first_num = ((number % 100 - (last_digit(number)))/ TENS_DIGIT);
+	first_num = ((number % 100 - (last_digit(number))) / TENS_DIGIT);
 	
 	return first_num;
 }
@@ -218,7 +223,7 @@ int last_digit(int number) {
 
 // Determines if a card is legal to play based on current suit and player's hand
 int legal_card(int current_card, int suit, int deck[], 
-				int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
+               int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
 	int trigger = FALSE;
 	
 	if (current_card >= 30 && current_card <= 39) {
@@ -301,7 +306,7 @@ int played_calves(int prev_rounds[N_MAX_ROUNDS][N_PLAYERS]) {
 
 // Picks the cards to play in the current round
 int card_select(int deck[], int suit, int total_cards, 
-				int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
+                int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
 	
 	int points = 0;
 	int card_x = 0;
