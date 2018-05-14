@@ -223,7 +223,7 @@ int last_digit(int number) {
 
 // Determines if a card is legal to play based on current suit and player's hand
 int legal_card(int current_card, int suit, int deck[], 
-               int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
+				int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
 	int trigger = FALSE;
 	
 	if (current_card >= 30 && current_card <= 39) {
@@ -306,7 +306,7 @@ int played_calves(int prev_rounds[N_MAX_ROUNDS][N_PLAYERS]) {
 
 // Picks the cards to play in the current round
 int card_select(int deck[], int suit, int total_cards, 
-                int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
+				int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
 	
 	int points = 0;
 	int card_x = 0;
