@@ -3,7 +3,7 @@
 //
 // This program by Dheeraj Viswanadham (z5204820)
 //
-// Started: 18/04/2018 | Last edited: 13/05/2018
+// Started: 18/04/2018 | Last edited: 14/05/2018
 //
 // Version 1.0.1: Minor changes to wording of comments.
 // Version 1.0.0: Assignment released.
@@ -63,26 +63,26 @@ void bypass_space(int variable_i, int counter);
 // You should not need to change this main function
 
 int main(void) {
-    int which_action = 0;
+	int which_action = 0;
 	
-    scanf("%d", &which_action);
+	scanf("%d", &which_action);
 	
-    if (which_action == ACTION_PLAYER_NAME) {
-        print_player_name();
-    } else if (which_action == ACTION_DISCARD) {
-        choose_discards();
-    } else if (which_action == ACTION_PLAY_CARD) {
-        choose_card_to_play();
-    } else {
-        run_unit_tests();
-    }
+	if (which_action == ACTION_PLAYER_NAME) {
+		print_player_name();
+	} else if (which_action == ACTION_DISCARD) {
+		choose_discards();
+	} else if (which_action == ACTION_PLAY_CARD) {
+		choose_card_to_play();
+	} else {
+		run_unit_tests();
+	}
 	
-    return 0;
+	return 0;
 }
 
 // Prints the AI name
 void print_player_name(void) {
-    printf("Alpha-B1\n");
+	printf("Alpha-B1\n");
 }
 
 // Chooses strategic discards based on scanned input from STDIN
@@ -302,7 +302,7 @@ int played_calves(int prev_rounds[N_MAX_ROUNDS][N_PLAYERS]) {
 // Picks the cards to play in the current round
 int card_select(int deck[], int suit, int total_cards, 
 				int current_round[N_MAX_ROUNDS][N_PLAYERS]) {
-					
+	
 	int points = 0;
 	int card_x = 0;
 	int variable_x = 0;
@@ -327,7 +327,6 @@ int card_select(int deck[], int suit, int total_cards,
 double discard_risk(int current_card, int suit, int deck[], int play_cards) {
 	double hazard = 0;
 	int exponent = 1;
-	int total_risk_value = 0;
 	
 	// Reasoning: the bigger the suit, then the bigger the risk
 	if (suit) {
@@ -358,9 +357,7 @@ double discard_risk(int current_card, int suit, int deck[], int play_cards) {
 		}
 	}
 	
-	total_risk_value = (hazard * exponent);
-	
-	return total_risk_value;
+	return (hazard * exponent);
 }
 
 // Returns the highest suit if we are able to void it during our choose_discards
@@ -375,7 +372,7 @@ int void_is_true(int deck[], int total_voids) {
 		
 		variable_i = (variable_i + 1);
 	}
-
+	
 	int variable_x = 0;
 	int original_num_suits = SUITS;
 	int new_num_suits = 0;
@@ -441,7 +438,7 @@ void bypass_space(int variable_i, int counter) {
 // 5) Test that the specified cards are in the deck or not
 
 void run_unit_tests(void) {
-    // (1A) Testing the first-digit of the number function outputs correctly
+	// (1A) Testing the first-digit of the number function outputs correctly
 	assert(first_digit(10) == 1);
 	assert(first_digit(24) == 2);
 	assert(first_digit(36) == 3);
